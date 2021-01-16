@@ -12,7 +12,7 @@ que lista todas as notícias que são cadastradas pela aplicação admin.
 
 ### Arquitetura
 
-[![node](https://github.com/jonathanmdr/kubernetes/blob/master/News_project_architecture.png)](https://github.com/jonathanmdr/Survival-api/blob/master)
+[![node](https://github.com/jonathanmdr/kubernetes/blob/master/project_architecture.png)](https://github.com/jonathanmdr/Survival-api/blob/master)
 
 </br>
 
