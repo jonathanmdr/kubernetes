@@ -1,5 +1,5 @@
 # kubernetes
-Projeto do curso de Kubernetes, conhecendo e aplicando os conceitos de Pods, Services e ConfigMaps.
+Projeto do curso de Kubernetes, conhecendo e aplicando os conceitos de Pod, Service, ConfigMap, Deployment, StatefulSet, PersistentVolume, PersistentVolumeClaim, StorageClass, Probes e HPA.
 
 [![node](https://img.shields.io/badge/Kubernetes-stable-blue.svg)](https://kubernetes.io)
 [![node](https://img.shields.io/badge/Minikube-v1.12.1-steelblue.svg)](https://minikube.sigs.k8s.io)
