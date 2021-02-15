@@ -12,10 +12,10 @@ que lista todas as notícias que são cadastradas pela aplicação admin.
 
 ### Arquitetura
 
-[![node](https://github.com/jonathanmdr/kubernetes/blob/master/project_architecture.png)](https://github.com/jonathanmdr/Survival-api/blob/master)
+[![node](https://github.com/jonathanmdr/kubernetes/blob/master/docs/project_architecture.png)](https://github.com/jonathanmdr/Survival-api/blob/master)
 
 </br>
 
 ### Setup ambiente Linux
 
-[![node](https://github.com/jonathanmdr/kubernetes/blob/master/setup_to_kubectl_and_minikube.png)](https://github.com/jonathanmdr/Survival-api/blob/master)
+[![node](https://github.com/jonathanmdr/kubernetes/blob/master/docs/setup_to_kubectl_and_minikube.png)](https://github.com/jonathanmdr/Survival-api/blob/master)
