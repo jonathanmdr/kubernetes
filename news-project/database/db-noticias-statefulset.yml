@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-noticias-statefulset
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: db-noticias
+      labels:
+        app: db-noticias
+    spec:
+      containers:
+        - name: db-noticias-container
+          image: aluracursos/mysql-db:1
+          ports:
+            - containerPort: 3306
+          envFrom:
+            - configMapRef:
+                name: db-configmap
+          volumeMounts:
+            - name: database
+              mountPath: /var/lib/mysql
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: database
+          persistentVolumeClaim:
+            claimName: db-pvc
+  selector:
+    matchLabels:
+      app: db-noticias
+  serviceName: svc-db-noticias
