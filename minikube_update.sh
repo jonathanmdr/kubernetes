@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 # Minikube update script file
 minikube delete && \ 
@@ -13,6 +13,7 @@ minikube start && \
 minikube addons enable ingress && \
 minikube addons enable dashboard && \
 minikube addons enable metrics-server && \
+
 # Showing enabled addons
 echo '\n\n\033[4;33m Enabled Addons \033[0m' && \
 minikube addons list | grep STATUS && minikube addons list | grep enabled && \

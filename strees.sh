@@ -1,6 +1,17 @@
 #!/bin/bash
 
+set -e
+
+read -p "IP Address: " ip_address
+echo
+
+read -p "Port: " port
+echo
+
+read -p "Interval in seconds: " interval
+echo
+
 for i in {1..10000}; do
-    curl 172.17.0.2:30000
-    sleep $1
+    curl $ip_address:$port
+    sleep $interval
 done
