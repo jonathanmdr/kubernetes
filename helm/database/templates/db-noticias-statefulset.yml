@@ -39,5 +39,5 @@ spec:
             claimName: {{ .Values.database.pvc.metadata.name }}-pvc
   selector:
     matchLabels:
-      app: {{ .Values.database.statefulset.selector.matchLabels.app }}
-  serviceName: {{ .Values.database.statefulset.serviceName }}
+      app: {{ .Values.database.statefulset.spec.selector.matchLabels.app }}
+  serviceName: {{ .Values.database.statefulset.spec.serviceName }}

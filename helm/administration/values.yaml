@@ -1,0 +1,56 @@
+administration:
+  cm:
+    metadata:
+      name: sistema-noticias
+    data:
+      nameDatabase: empresa
+      hostDatabase: svc-db-noticias:3306
+      userDatabase: root
+      passDatabase: q1w2e3r4
+  pvc:
+    image:
+      metadata:
+        name: sistema-noticias-images
+      spec:
+        accessModes: ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+    session:
+      metadata:
+        name: sistema-noticias-session
+      spec:
+        accessModes: ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  service:
+    metadata:
+      name: sistema-noticias
+    spec:
+      type: NodePort
+      selector:
+        app: sistema-noticias
+      ports:
+        port: 80
+        nodePort: 30001
+  statefulset:
+    metadata:
+      name: sistema-noticias
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          name: sistema-noticias
+          labels:
+            app: sistema-noticias
+        spec:
+          container:
+            name: sistema-noticias
+            image: aluracursos/sistema-noticias:1
+            port:
+              containerPort: 80
+      selector:
+        matchLabels:
+          app: sistema-noticias
+      serviceName: sistema-noticias

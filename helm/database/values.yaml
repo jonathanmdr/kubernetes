@@ -11,9 +11,9 @@ database:
       name: db-noticias
     spec:
       accessModes: ReadWriteOnce
-    resources:
-      requests:
-        storage: 3Gi
+      resources:
+        requests:
+          storage: 3Gi
   service:
     metadata:
       name: db-noticias
@@ -35,11 +35,11 @@ database:
             app: db-noticias
         spec:
           container:
-            name: db-noticias-container
+            name: db-noticias
             image: aluracursos/mysql-db:1
             port:
               containerPort: 3306
-    selector:
-      matchLabels:
-        app: db-noticias
-    serviceName: db-noticias
+      selector:
+        matchLabels:
+          app: db-noticias
+      serviceName: db-noticias

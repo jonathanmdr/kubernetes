@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.administration.cm.metadata.name }}-configmap
+data:
+  DATABASE_DB: {{ .Values.administration.cm.data.nameDatabase }}
+  HOST_DB: {{ .Values.administration.cm.data.hostDatabase }}
+  USER_DB: {{ .Values.administration.cm.data.userDatabase }}
+  PASS_DB: {{ .Values.administration.cm.data.passDatabase }}

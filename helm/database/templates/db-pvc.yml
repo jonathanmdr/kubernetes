@@ -7,4 +7,4 @@ spec:
     - {{ .Values.database.pvc.spec.accessModes }}
   resources:
     requests:
-      storage: {{ .Values.database.pvc.resources.requests.storage }}
+      storage: {{ .Values.database.pvc.spec.resources.requests.storage }}
