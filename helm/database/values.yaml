@@ -1,0 +1,45 @@
+database:
+  cm:
+    metadata:
+      name: db-noticias
+    data:
+      mySqlRootPassword: q1w2e3r4
+      mySqlDatabase: empresa
+      mySqlPassword: q1w2e3r4
+  pvc:
+    metadata:
+      name: db-noticias
+    spec:
+      accessModes: ReadWriteOnce
+    resources:
+      requests:
+        storage: 3Gi
+  service:
+    metadata:
+      name: db-noticias
+    spec:
+      type: ClusterIP
+      selector:
+        app: db-noticias
+      ports:
+        port: 3306
+  statefulset:
+    metadata:
+      name: db-noticias
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          name: db-noticias
+          labels:
+            app: db-noticias
+        spec:
+          container:
+            name: db-noticias-container
+            image: aluracursos/mysql-db:1
+            port:
+              containerPort: 3306
+    selector:
+      matchLabels:
+        app: db-noticias
+    serviceName: db-noticias

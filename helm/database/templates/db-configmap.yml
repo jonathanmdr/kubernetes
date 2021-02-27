@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.database.cm.metadata.name }}-configmap
+data:
+  MYSQL_ROOT_PASSWORD: {{ .Values.database.cm.data.mySqlRootPassword }}
+  MYSQL_DATABASE: {{ .Values.database.cm.data.mySqlDatabase }}
+  MYSQL_PASSWORD: {{ .Values.database.cm.data.mySqlPassword }}

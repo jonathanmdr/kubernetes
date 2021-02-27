@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.database.statefulset.metadata.name }}-statefulset
+spec:
+  replicas: {{ .Values.database.statefulset.spec.replicas }}
+  template:
+    metadata:
+      name: {{ .Values.database.statefulset.spec.template.metadata.name }}
+      labels:
+        app: {{ .Values.database.statefulset.spec.template.metadata.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.database.statefulset.spec.template.spec.container.name }}-container
+          image: {{ .Values.database.statefulset.spec.template.spec.container.image }}
+          ports:
+            - containerPort: {{ .Values.database.statefulset.spec.template.spec.container.port.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.database.cm.metadata.name }}-configmap
+          volumeMounts:
+            - name: database
+              mountPath: /var/lib/mysql
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.database.statefulset.spec.template.spec.container.port.containerPort }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.database.statefulset.spec.template.spec.container.port.containerPort }}
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: database
+          persistentVolumeClaim:
+            claimName: {{ .Values.database.pvc.metadata.name }}-pvc
+  selector:
+    matchLabels:
+      app: {{ .Values.database.statefulset.selector.matchLabels.app }}
+  serviceName: {{ .Values.database.statefulset.serviceName }}
