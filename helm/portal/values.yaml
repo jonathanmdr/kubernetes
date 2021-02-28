@@ -1,0 +1,39 @@
+portal:
+  cm:
+    metadata:
+      name: portal-noticias
+    data:
+      systemHost: http://192.168.49.2:30001
+  service:
+    metadata:
+      name: portal-noticias
+    spec:
+      type: NodePort
+      selector:
+        app: portal-noticias
+      ports:
+        port: 80
+        nodePort: 30000
+  deployment:
+    metadata:
+      name: portal-noticias
+    spec:
+      replicas: 3
+      template:
+        metadata:
+          name: portal-noticias
+          labels:
+            app: portal-noticias
+        spec:
+          container:
+            name: portal-noticias
+            image: aluracursos/portal-noticias:1
+            port:
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+      selector:
+        matchLabels:
+          app: portal-noticias
+      serviceName: portal-noticias

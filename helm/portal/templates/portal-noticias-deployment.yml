@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.portal.deployment.metadata.name }}-deployment
+spec:
+  template:
+    metadata:
+      name: {{ .Values.portal.deployment.spec.template.metadata.name }}
+      labels:
+        app: {{ .Values.portal.deployment.spec.template.metadata.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.portal.deployment.spec.template.spec.container.name }}
+          image: {{ .Values.portal.deployment.spec.template.spec.container.image }}
+          ports:
+            - containerPort: {{ .Values.portal.deployment.spec.template.spec.container.port.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.portal.cm.metadata.name }}-configmap
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.portal.deployment.spec.template.spec.container.port.containerPort }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.portal.deployment.spec.template.spec.container.port.containerPort }}
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: {{ .Values.portal.deployment.spec.template.spec.resources.requests.cpu }}
+  replicas: {{ .Values.portal.deployment.spec.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.portal.deployment.spec.selector.matchLabels.app }}
