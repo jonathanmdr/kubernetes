@@ -52,7 +52,7 @@ Intalação |
 
 </br>
 
-[![node](https://github.com/jonathanmdr/kubernetes/blob/master/utils/setup_environment.sh)](Setup Linux)
+[Setup Linux File](https://github.com/jonathanmdr/kubernetes/blob/master/utils/setup_environment.sh)
 
 </br>
 
@@ -71,4 +71,4 @@ Execute o script bash `deploy.sh` para montar o ambiente com os recursos necess�
 
 </br>
 
-[![node](https://github.com/jonathanmdr/kubernetes/blob/master/utils/deploy.sh)](Deploy Application)
+[Deploy Application File](https://github.com/jonathanmdr/kubernetes/blob/master/utils/deploy.sh)
