@@ -26,8 +26,7 @@ if [[ "$have_docker" == "$NOT_FOUND" ]]; then
     exit 1
 fi
 
-function clean_kubectx() {
-    rm -rf "$KUBECTX_REPOSITORY" && \
+function clean_kubectx() {    
     rm -rf "$HOME"/.kubectx
 }
 
@@ -48,13 +47,12 @@ function install_kubectx() {
 
     if [[ "$update_bashrc" == "$NOT_FOUND" ]]; then
         update_bashrc_kubectx
-    fi
-
-    rm -rf "$KUBECTX_REPOSITORY"
+    fi    
 }
 
 function install_kubectl() {
-    sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg2 curl && \
+    sudo apt-get update && \
+    sudo apt-get install -y apt-transport-https gnupg2 curl && \
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && \
     echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list && \
     sudo apt-get update && \

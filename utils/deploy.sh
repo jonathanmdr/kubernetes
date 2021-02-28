@@ -41,8 +41,11 @@ if [[ "$have_helm" == "$NOT_FOUND" ]]; then
 fi
 
 function create_namespace() {
-    kubectl delete namespace "$NAMESPACE"
-    kubectl create namespace "$NAMESPACE"
+    namespace=$(kubens | grep "$NAMESPACE" || echo "$NOT_FOUND")
+
+    if [[ "$namespace" == "$NOT_FOUND" ]]; then
+        kubectl create namespace "$NAMESPACE"    
+    fi        
 }
 
 function deploy_database() {
