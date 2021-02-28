@@ -58,7 +58,7 @@ Intalação |
 
 ## Deploy:
 
-Execute o script bash `deploy.sh` para montar o ambiente com os recursos necessários.
+Execute o script bash `deploy.sh` para subir a aplicação toda no cluster kubernetes local configurado anteriormente no setup.
 
 </br>
 
