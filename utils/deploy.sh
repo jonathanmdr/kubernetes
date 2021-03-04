@@ -91,6 +91,8 @@ deploy() {
 }
 
 undeploy() {
+    kubectx minikube && \
+    kubens "$NAMESPACE" && \
     undeploy_portal && \
     undeploy_administration && \
     undeploy_database && \
