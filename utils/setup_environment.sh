@@ -26,18 +26,18 @@ if [[ "$have_docker" == "$NOT_FOUND" ]]; then
     exit 1
 fi
 
-function clean_kubectx() {    
+clean_kubectx() {    
     rm -rf "$HOME"/.kubectx
 }
 
-function update_bashrc_kubectx() {
+update_bashrc_kubectx() {
 cat << EOF >> "$HOME"/.bashrc
 #kubectx and kubens
 export PATH="$HOME"/.kubectx:\"$PATH"
 EOF
 }
 
-function install_kubectx() {
+install_kubectx() {
     clean_kubectx && \
     git clone "$KUBECTX_REPOSITORY" "$HOME"/.kubectx && \
     COMPDIR=$(pkg-config --variable=completionsdir bash-completion) && \
@@ -50,7 +50,7 @@ function install_kubectx() {
     fi    
 }
 
-function install_kubectl() {
+install_kubectl() {
     sudo apt-get update && \
     sudo apt-get install -y apt-transport-https gnupg2 curl && \
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && \
@@ -59,7 +59,7 @@ function install_kubectl() {
     sudo apt-get install -y kubectl
 }
 
-function install_helm() {
+install_helm() {
     curl https://baltocdn.com/helm/signing.asc | sudo apt-key add - && \
     sudo apt-get install apt-transport-https --yes && \
     echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list && \
@@ -67,12 +67,12 @@ function install_helm() {
     sudo apt-get install helm
 }
 
-function clean_minikube() {
+clean_minikube() {
     minikube delete && \
     sudo rm -rf /usr/local/bin/minikube
 }
 
-function install_minikube() {
+install_minikube() {
     sudo curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && \
     sudo install minikube /usr/local/bin/minikube && \
     sudo rm minikube && \

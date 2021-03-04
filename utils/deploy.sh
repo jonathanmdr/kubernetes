@@ -5,6 +5,10 @@ set -e
 NAMESPACE="news-project"
 NOT_FOUND="not found"
 
+DATABASE_RELEASE_NAME="database-noticias"
+ADMIN_RELEASE_NAME="administration-noticias"
+PORTAL_RELEASE_NAME="portal-noticias"
+
 have_minikube=$(which minikube || echo "$NOT_FOUND")
 
 if [[ "$have_minikube" == "$NOT_FOUND" ]]; then
@@ -40,7 +44,7 @@ if [[ "$have_helm" == "$NOT_FOUND" ]]; then
     exit 1
 fi
 
-function create_namespace() {
+create_namespace() {
     namespace=$(kubens | grep "$NAMESPACE" || echo "$NOT_FOUND")
 
     if [[ "$namespace" == "$NOT_FOUND" ]]; then
@@ -48,19 +52,35 @@ function create_namespace() {
     fi        
 }
 
-function deploy_database() {
-    helm upgrade -f ./helm/database/values.yaml database-noticias ./helm/database --install --force
+delete_namespace() {
+    kubectl delete namespace "$NAMESPACE"
 }
 
-function deploy_administration() {
-    helm upgrade -f ./helm/administration/values.yaml administration-noticias ./helm/administration --install --force
+deploy_database() {
+    helm upgrade -f ./helm/database/values.yaml "$DATABASE_RELEASE_NAME" ./helm/database --install --force
 }
 
-function deploy_portal() {
-    helm upgrade -f ./helm/portal/values.yaml portal-noticias ./helm/portal --install --force
+undeploy_database() {
+    helm uninstall "$DATABASE_RELEASE_NAME"
 }
 
-function deploy() {
+deploy_administration() {
+    helm upgrade -f ./helm/administration/values.yaml "$ADMIN_RELEASE_NAME" ./helm/administration --install --force
+}
+
+undeploy_administration() {
+    helm uninstall "$ADMIN_RELEASE_NAME"
+}
+
+deploy_portal() {
+    helm upgrade -f ./helm/portal/values.yaml "$PORTAL_RELEASE_NAME" ./helm/portal --install --force
+}
+
+undeploy_portal() {
+    helm uninstall "$PORTAL_RELEASE_NAME"
+}
+
+deploy() {
     cd .. && \
     kubectx minikube && \
     create_namespace && \
@@ -70,4 +90,34 @@ function deploy() {
     deploy_portal
 }
 
-deploy
+undeploy() {
+    undeploy_portal && \
+    undeploy_administration && \
+    undeploy_database && \
+    delete_namespace && \
+    printf "\n\n\033[4;33m WARNING: PVs are not excluded from the cluster automatically, a manual intervention is required. \033[0m\n\n"    
+}
+
+if [ -z "$1" ]; then
+    while [ -z "$parameter" ]
+    do
+        read -rp "Inform a parameter: (up/down) -> " parameter        
+    done
+else
+    parameter="$1"
+fi
+
+case "$parameter" in
+    up)
+    deploy
+    ;;
+
+    down)
+    undeploy
+    ;;
+
+    *)
+        printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
+        echo "Usage: './deploy.sh up' or './deploy.sh down'"
+    ;;
+esac
