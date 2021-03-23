@@ -5,29 +5,36 @@ set -e
 KUBECTX_REPOSITORY="https://github.com/ahmetb/kubectx.git"
 NOT_FOUND="not found"
 
-have_curl=$(which curl || echo "$NOT_FOUND")
 
-if [[ "$have_curl" == "$NOT_FOUND" ]]; then
-    echo "'curl' not found, this is mandatory"
-    exit 1
-fi
+clean_kubectx_on_bashrc() {
+    SYMLINKDIR=$(pkg-config --variable=completionsdir bash-completion)
+    sudo rm -rf "$HOME"/.kubectx && \
+    sudo rm "$SYMLINKDIR"/kubens && \
+    sudo rm "$SYMLINKDIR"/kubectx
+}
 
-have_git=$(which git || echo "$NOT_FOUND")
+clean_kubectx_on_zshrc() {
+    sudo rm -rf "$HOME"/.kubectx && \
+    sudo rm "$HOME"/.oh-my-zsh/completions/_kubens.zsh && \
+    sudo rm "$HOME"/.oh-my-zsh/completions/_kubectx.zsh
+}
 
-if [[ "$have_git" == "$NOT_FOUND" ]]; then
-    echo "'git' not found, this is mandatory"
-    exit 1
-fi
+clean_kubectx() {
+    case "$1" in
+        bash)
+        clean_kubectx_on_bashrc
+        ;;
 
-have_docker=$(which docker || echo "$NOT_FOUND")
+        zsh)
+        clean_kubectx_on_zshrc
+        ;;
 
-if [[ "$have_docker" == "$NOT_FOUND" ]]; then
-    echo "'docker' not found, this is mandatory"
-    exit 1
-fi
-
-clean_kubectx() {    
-    rm -rf "$HOME"/.kubectx
+        *)
+            printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
+            echo "Usage: './setup_environment.sh bash' or './setup_environment.sh zsh'"
+            exit 1
+        ;;
+    esac    
 }
 
 update_bashrc_kubectx() {
@@ -37,17 +44,54 @@ export PATH="$HOME"/.kubectx:\"$PATH"
 EOF
 }
 
-install_kubectx() {
-    clean_kubectx && \
-    git clone "$KUBECTX_REPOSITORY" "$HOME"/.kubectx && \
-    COMPDIR=$(pkg-config --variable=completionsdir bash-completion) && \
-    sudo ln -sf "$HOME"/.kubectx/completion/kubens.bash "$COMPDIR"/kubens && \
-    sudo ln -sf "$HOME"/.kubectx/completion/kubectx.bash "$COMPDIR"/kubectx && \
+update_zshrc_kubectx() {
+cat << EOF >> "$HOME"/.zshrc
+#kubectx and kubens
+export PATH="$HOME"/.kubectx:\"$PATH"
+EOF
+}
+
+install_kubectx_on_bashrc() {
+    SYMLINKDIR=$(pkg-config --variable=completionsdir bash-completion) && \
+    sudo ln -sf "$HOME"/.kubectx/completion/kubens.bash "$SYMLINKDIR"/kubens && \
+    sudo ln -sf "$HOME"/.kubectx/completion/kubectx.bash "$SYMLINKDIR"/kubectx
     update_bashrc=$(cat "$HOME"/.bashrc | grep "kubectx and kubens" || echo "$NOT_FOUND")
 
     if [[ "$update_bashrc" == "$NOT_FOUND" ]]; then
         update_bashrc_kubectx
-    fi    
+    fi
+}
+
+install_kubectx_on_zshrc() {
+    sudo mkdir -p ~/.oh-my-zsh/completions && \
+    sudo chmod -R 755 ~/.oh-my-zsh/completions && \
+    sudo ln -s "$HOME"/.kubectx/completion/kubens.zsh "$HOME"/.oh-my-zsh/completions/_kubens.zsh && \
+    sudo ln -s "$HOME"/.kubectx/completion/kubectx.zsh "$HOME"/.oh-my-zsh/completions/_kubectx.zsh
+    update_zshrc=$(cat "$HOME"/.zshrc | grep "kubectx and kubens" || echo "$NOT_FOUND")
+
+    if [[ "$update_zshrc" == "$NOT_FOUND" ]]; then
+        update_zshrc_kubectx
+    fi
+}
+
+install_kubectx() {    
+    git clone "$KUBECTX_REPOSITORY" "$HOME"/.kubectx
+
+    case "$1" in
+    bash)
+    install_kubectx_on_bashrc
+    ;;
+
+    zsh)
+    install_kubectx_on_zshrc
+    ;;
+
+    *)
+        printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
+        echo "Usage: './setup_environment.sh bash' or './setup_environment.sh zsh'"
+        exit 1
+    ;;
+esac
 }
 
 install_kubectl() {
@@ -86,44 +130,82 @@ install_minikube() {
     minikube status
 }
 
-have_kubectx=$(which kubectx || echo "$NOT_FOUND")
+startup_validation() {
+    have_curl=$(which curl || echo "$NOT_FOUND")
 
-if [[ "$have_kubectx" == "$NOT_FOUND" ]]; then
-    echo "'kubectx' not found, installation in progress..."    
-    install_kubectx
+    if [[ "$have_curl" == "$NOT_FOUND" ]]; then
+        echo "'curl' not found, this is mandatory"
+        exit 1
+    fi
+
+    have_git=$(which git || echo "$NOT_FOUND")
+
+    if [[ "$have_git" == "$NOT_FOUND" ]]; then
+        echo "'git' not found, this is mandatory"
+        exit 1
+    fi
+
+    have_docker=$(which docker || echo "$NOT_FOUND")
+
+    if [[ "$have_docker" == "$NOT_FOUND" ]]; then
+        echo "'docker' not found, this is mandatory"
+        exit 1
+    fi
+}
+
+main() {
+    have_kubectx=$(which kubectx || echo "$NOT_FOUND")
+
+    if [[ "$have_kubectx" == "$NOT_FOUND" ]]; then
+        echo "'kubectx' not found, installation in progress..."    
+        install_kubectx "$1"
+    else
+        echo "'kubectx' found, updating to latest version..."
+        clean_kubectx "$1" && \
+        install_kubectx "$1"
+    fi
+
+    have_kubectl=$(which kubectl || echo "$NOT_FOUND")
+
+    if [[ "$have_kubectl" == "$NOT_FOUND" ]]; then
+        echo "'kubectl' not found, installation in progress..."    
+        install_kubectl
+    else
+        echo "'kubectl' found, updating to latest version..."
+        sudo apt-get update
+    fi
+
+    have_helm=$(which helm || echo "$NOT_FOUND")
+
+    if [[ "$have_helm" == "$NOT_FOUND" ]]; then
+        echo "'helm' not found, installation in progress..."    
+        install_helm
+    else
+        echo "'helm' found, updating to latest version..."
+        sudo apt-get update
+    fi
+
+    have_minikube=$(which minikube || echo "$NOT_FOUND")
+
+    if [[ "$have_minikube" == "$NOT_FOUND" ]]; then
+        echo "'minikube' not found, installation in progress..."    
+        install_minikube
+    else
+        echo "'minikube' found, updating to latest version..."
+        clean_minikube && \
+        install_minikube
+    fi
+}
+
+startup_validation
+
+if [ -z "$1" ]; then
+    while [ -z "$parameter" ]
+    do
+        read -rp "Inform a parameter: (bash/zsh) -> " parameter        
+    done
 else
-    echo "'kubectx' found, updating to latest version..."
-    clean_kubectx && \
-    install_kubectx
+    parameter="$1"
 fi
 
-have_kubectl=$(which kubectl || echo "$NOT_FOUND")
-
-if [[ "$have_kubectl" == "$NOT_FOUND" ]]; then
-    echo "'kubectl' not found, installation in progress..."    
-    install_kubectl
-else
-    echo "'kubectl' found, updating to latest version..."
-    sudo apt-get update
-fi
-
-have_helm=$(which helm || echo "$NOT_FOUND")
-
-if [[ "$have_helm" == "$NOT_FOUND" ]]; then
-    echo "'helm' not found, installation in progress..."    
-    install_helm
-else
-    echo "'helm' found, updating to latest version..."
-    sudo apt-get update
-fi
-
-have_minikube=$(which minikube || echo "$NOT_FOUND")
-
-if [[ "$have_minikube" == "$NOT_FOUND" ]]; then
-    echo "'minikube' not found, installation in progress..."    
-    install_minikube
-else
-    echo "'minikube' found, updating to latest version..."
-    clean_minikube && \
-    install_minikube
-fi
+main "$parameter"
