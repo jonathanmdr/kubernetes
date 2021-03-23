@@ -21,7 +21,7 @@ que lista todas as notícias que são cadastradas pela aplicação admin.
 
 ## Setup Ambiente Linux:
 
-Execute o script bash `setup_environment.sh` para montar o ambiente com os recursos necessários.
+Execute o script bash `setup_k8s_dev_environment.sh` para montar o ambiente com os recursos necessários.
 
 </br>
 
@@ -46,13 +46,14 @@ Intalação |
 #### Exemplo de uso:
 
 ```bash
-~$ chmod +x setup_environment.sh
-~$ ./setup_environment.sh
+~$ chmod +x setup_k8s_dev_environment.sh
+~$ ./setup_k8s_dev_environment.sh bash #Para quem utiliza o .bashrc
+~$ ./setup_k8s_dev_environment.sh zsh #Para quem utiliza o .zshrc
 ```
 
 </br>
 
-[Setup Linux File](https://github.com/jonathanmdr/kubernetes/blob/master/utils/setup_environment.sh)
+[Setup Linux File](https://github.com/jonathanmdr/kubernetes/blob/master/utils/setup_k8s_dev_environment.sh)
 
 </br>
 
