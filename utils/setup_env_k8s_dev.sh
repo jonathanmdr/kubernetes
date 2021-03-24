@@ -10,15 +10,15 @@ YELLOW=$(tput setaf 3)
 DEFAULT=$(tput sgr0)
 
 
-error_message() {    
+error_message() {
     printf "\n\n${RED} ERROR: ${DEFAULT}%s \n\n" "$1"
 }
 
-warning_message() {    
+warning_message() {
     printf "\n\n${YELLOW} WARNING: ${DEFAULT}%s \n\n" "$1"
 }
 
-info_message() {    
+info_message() {
     printf "\n\n${GREEN} INFO: ${DEFAULT}%s \n\n" "$1"
 }
 
@@ -46,10 +46,10 @@ clean_kubectx() {
         ;;
 
         *)
-        error_message "Invalid parameter"
+        error_message "Invalid parameter."
         exit 1
         ;;
-    esac    
+    esac
 }
 
 set_kubectx_on_path() {
@@ -95,7 +95,7 @@ install_kubectx() {
         ;;
 
         *)
-        error_message "Invalid parameter"
+        error_message "Invalid parameter."
         exit 1
         ;;
     esac
@@ -137,11 +137,11 @@ install_minikube() {
     minikube status
 }
 
-validate_mandatory_resources() {
+validate_mandatory_resource() {
     resource_exists=$(which "$1" || echo "$RESOURCE_NOT_FOUND")
 
     if [[ "$resource_exists" == "$RESOURCE_NOT_FOUND" ]]; then
-        warning_message "'$1' not found, this is mandatory"
+        warning_message "'$1' not found, this is mandatory."
         exit 1
     fi
 }
@@ -150,7 +150,7 @@ startup_validation() {
     resources_required=("curl" "git" "docker")
 
     for resource in "${resources_required[@]}"; do
-        validate_mandatory_resources "$resource"
+        validate_mandatory_resource "$resource"
     done
 }
 
@@ -212,7 +212,7 @@ startup_validation
 if [ -z "$1" ]; then
     while [ -z "$parameter" ]
     do
-        read -rp "Inform a parameter: (bash/zsh) -> " parameter        
+        read -rp "Inform a parameter: (bash/zsh) -> " parameter
     done
 else
     parameter="$1"
@@ -221,7 +221,7 @@ fi
 valid_parameters=("bash" "zsh")
 
 if [[ ! "${valid_parameters[*]}" =~ ${parameter} ]]; then
-    error_message "The parameter does not valid"
+    error_message "The parameter does not valid."
     exit 1
 fi
 
