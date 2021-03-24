@@ -33,7 +33,7 @@ Requisitos |
 
 </br>
 
-Intalação |
+Instalação |
 --|
 `kubectx` |
 `kubens` |
