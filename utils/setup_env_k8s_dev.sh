@@ -3,8 +3,24 @@
 set -e
 
 KUBECTX_REPOSITORY="https://github.com/ahmetb/kubectx.git"
-NOT_FOUND="not found"
+RESOURCE_NOT_FOUND="not found"
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+DEFAULT=$(tput sgr0)
 
+
+error_message() {    
+    printf "\n\n${RED} ERROR: ${DEFAULT}%s \n\n" "$1"
+}
+
+warning_message() {    
+    printf "\n\n${YELLOW} WARNING: ${DEFAULT}%s \n\n" "$1"
+}
+
+info_message() {    
+    printf "\n\n${GREEN} INFO: ${DEFAULT}%s \n\n" "$1"
+}
 
 clean_kubectx_on_bashrc() {
     SYMLINKDIR=$(pkg-config --variable=completionsdir bash-completion)
@@ -30,48 +46,40 @@ clean_kubectx() {
         ;;
 
         *)
-            printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"     
-            echo "Usage: './setup_k8s_dev_environment.sh bash' or './setup_k8s_dev_environment.sh zsh'"
-            exit 1
+        error_message "Invalid parameter"
+        exit 1
         ;;
     esac    
 }
 
-update_bashrc_kubectx() {
-cat << EOF >> "$HOME"/.bashrc
+set_kubectx_on_path() {
+cat << EOF >> "$HOME/.$1"
 #kubectx and kubens
 export PATH="$HOME"/.kubectx:\"$PATH"
 EOF
 }
 
-update_zshrc_kubectx() {
-cat << EOF >> "$HOME"/.zshrc
-#kubectx and kubens
-export PATH="$HOME"/.kubectx:\"$PATH"
-EOF
+update_path_if_necessary() {
+    kubectx_exported=$(cat "$HOME/.$1" | grep "kubectx and kubens" || echo "$RESOURCE_NOT_FOUND")
+
+    if [[ "$kubectx_exported" == "$RESOURCE_NOT_FOUND" ]]; then
+        set_kubectx_on_path "$1"
+    fi
 }
 
 install_kubectx_on_bashrc() {
     SYMLINKDIR=$(pkg-config --variable=completionsdir bash-completion) && \
     sudo ln -sf "$HOME"/.kubectx/completion/kubens.bash "$SYMLINKDIR"/kubens && \
-    sudo ln -sf "$HOME"/.kubectx/completion/kubectx.bash "$SYMLINKDIR"/kubectx
-    update_bashrc=$(cat "$HOME"/.bashrc | grep "kubectx and kubens" || echo "$NOT_FOUND")
-
-    if [[ "$update_bashrc" == "$NOT_FOUND" ]]; then
-        update_bashrc_kubectx
-    fi
+    sudo ln -sf "$HOME"/.kubectx/completion/kubectx.bash "$SYMLINKDIR"/kubectx && \
+    update_path_if_necessary "bashrc"
 }
 
 install_kubectx_on_zshrc() {
-    sudo mkdir -p ~/.oh-my-zsh/completions && \
-    sudo chmod -R 755 ~/.oh-my-zsh/completions && \
+    sudo mkdir -p "$HOME"/.oh-my-zsh/completions && \
+    sudo chmod -R 755 "$HOME"/.oh-my-zsh/completions && \
     sudo ln -s "$HOME"/.kubectx/completion/kubens.zsh "$HOME"/.oh-my-zsh/completions/_kubens.zsh && \
-    sudo ln -s "$HOME"/.kubectx/completion/kubectx.zsh "$HOME"/.oh-my-zsh/completions/_kubectx.zsh
-    update_zshrc=$(cat "$HOME"/.zshrc | grep "kubectx and kubens" || echo "$NOT_FOUND")
-
-    if [[ "$update_zshrc" == "$NOT_FOUND" ]]; then
-        update_zshrc_kubectx
-    fi
+    sudo ln -s "$HOME"/.kubectx/completion/kubectx.zsh "$HOME"/.oh-my-zsh/completions/_kubectx.zsh && \
+    update_path_if_necessary "zshrc"
 }
 
 install_kubectx() {    
@@ -87,9 +95,8 @@ install_kubectx() {
         ;;
 
         *)
-            printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
-            echo "Usage: './setup_k8s_dev_environment.sh bash' or './setup_k8s_dev_environment.sh zsh'"
-            exit 1
+        error_message "Invalid parameter"
+        exit 1
         ;;
     esac
 }
@@ -108,7 +115,7 @@ install_helm() {
     sudo apt-get install apt-transport-https --yes && \
     echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list && \
     sudo apt-get update && \
-    sudo apt-get install helm
+    sudo apt-get install -y helm
 }
 
 clean_minikube() {
@@ -130,71 +137,74 @@ install_minikube() {
     minikube status
 }
 
-startup_validation() {
-    have_curl=$(which curl || echo "$NOT_FOUND")
+validate_mandatory_resources() {
+    resource_exists=$(which "$1" || echo "$RESOURCE_NOT_FOUND")
 
-    if [[ "$have_curl" == "$NOT_FOUND" ]]; then
-        echo "'curl' not found, this is mandatory"
-        exit 1
-    fi
-
-    have_git=$(which git || echo "$NOT_FOUND")
-
-    if [[ "$have_git" == "$NOT_FOUND" ]]; then
-        echo "'git' not found, this is mandatory"
-        exit 1
-    fi
-
-    have_docker=$(which docker || echo "$NOT_FOUND")
-
-    if [[ "$have_docker" == "$NOT_FOUND" ]]; then
-        echo "'docker' not found, this is mandatory"
+    if [[ "$resource_exists" == "$RESOURCE_NOT_FOUND" ]]; then
+        warning_message "'$1' not found, this is mandatory"
         exit 1
     fi
 }
 
-main() {
-    have_kubectx=$(which kubectx || echo "$NOT_FOUND")
+startup_validation() {
+    resources_required=("curl" "git" "docker")
 
-    if [[ "$have_kubectx" == "$NOT_FOUND" ]]; then
-        echo "'kubectx' not found, installation in progress..."
+    for resource in "${resources_required[@]}"; do
+        validate_mandatory_resources "$resource"
+    done
+}
+
+process_kubectx_installation() {
+    resource=$(which kubectx || echo "$RESOURCE_NOT_FOUND")
+
+    if [[ "$resource" == "$RESOURCE_NOT_FOUND" ]]; then
+        info_message "'kubectx' not found, installation in progress..."
         install_kubectx "$1"
     else
-        echo "'kubectx' found, updating to latest version..."
+        info_message "'kubectx' found, updating to latest version..."
         clean_kubectx "$1" && \
         install_kubectx "$1"
     fi
+}
 
-    have_kubectl=$(which kubectl || echo "$NOT_FOUND")
+process_kubectl_installation() {
+    resource=$(which kubectl || echo "$RESOURCE_NOT_FOUND")
 
-    if [[ "$have_kubectl" == "$NOT_FOUND" ]]; then
-        echo "'kubectl' not found, installation in progress..."
+    if [[ "$resource" == "$RESOURCE_NOT_FOUND" ]]; then
+        info_message "'kubectl' not found, installation in progress..."
         install_kubectl
-    else
-        echo "'kubectl' found, updating to latest version..."
-        sudo apt-get update
     fi
+}
 
-    have_helm=$(which helm || echo "$NOT_FOUND")
+process_helm_installation() {
+    resource=$(which helm || echo "$RESOURCE_NOT_FOUND")
 
-    if [[ "$have_helm" == "$NOT_FOUND" ]]; then
-        echo "'helm' not found, installation in progress..."
+    if [[ "$resource" == "$RESOURCE_NOT_FOUND" ]]; then
+        info_message "'helm' not found, installation in progress..."
         install_helm
-    else
-        echo "'helm' found, updating to latest version..."
-        sudo apt-get update
     fi
+}
 
-    have_minikube=$(which minikube || echo "$NOT_FOUND")
+process_minikube_installation() {
+    resource=$(which minikube || echo "$RESOURCE_NOT_FOUND")
 
-    if [[ "$have_minikube" == "$NOT_FOUND" ]]; then
-        echo "'minikube' not found, installation in progress..."
+    if [[ "$resource" == "$RESOURCE_NOT_FOUND" ]]; then
+        info_message "'minikube' not found, installation in progress..."
         install_minikube
     else
-        echo "'minikube' found, updating to latest version..."
+        info_message "'minikube' found, updating to latest version..."
         clean_minikube && \
         install_minikube
     fi
+}
+
+main() {
+    process_kubectx_installation "$1" && \
+    process_kubectl_installation && \
+    process_helm_installation && \
+    process_minikube_installation && \
+    sudo apt-get update && \
+    info_message "Successful on the setup of K8s development environment."
 }
 
 startup_validation
@@ -202,10 +212,17 @@ startup_validation
 if [ -z "$1" ]; then
     while [ -z "$parameter" ]
     do
-        read -rp "Inform a parameter: (bash/zsh) -> " parameter
+        read -rp "Inform a parameter: (bash/zsh) -> " parameter        
     done
 else
     parameter="$1"
+fi
+
+valid_parameters=("bash" "zsh")
+
+if [[ ! "${valid_parameters[*]}" =~ ${parameter} ]]; then
+    error_message "The parameter does not valid"
+    exit 1
 fi
 
 main "$parameter"
