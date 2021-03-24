@@ -30,8 +30,8 @@ clean_kubectx() {
         ;;
 
         *)
-            printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
-            echo "Usage: './setup_environment.sh bash' or './setup_environment.sh zsh'"
+            printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"     
+            echo "Usage: './setup_k8s_dev_environment.sh bash' or './setup_k8s_dev_environment.sh zsh'"
             exit 1
         ;;
     esac    
@@ -78,20 +78,20 @@ install_kubectx() {
     git clone "$KUBECTX_REPOSITORY" "$HOME"/.kubectx
 
     case "$1" in
-    bash)
-    install_kubectx_on_bashrc
-    ;;
+        bash)
+        install_kubectx_on_bashrc
+        ;;
 
-    zsh)
-    install_kubectx_on_zshrc
-    ;;
+        zsh)
+        install_kubectx_on_zshrc
+        ;;
 
-    *)
-        printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
-        echo "Usage: './setup_environment.sh bash' or './setup_environment.sh zsh'"
-        exit 1
-    ;;
-esac
+        *)
+            printf "\033[4;33m WARNING: Invalid parameter \033[0m\n\n"        
+            echo "Usage: './setup_k8s_dev_environment.sh bash' or './setup_k8s_dev_environment.sh zsh'"
+            exit 1
+        ;;
+    esac
 }
 
 install_kubectl() {
@@ -157,7 +157,7 @@ main() {
     have_kubectx=$(which kubectx || echo "$NOT_FOUND")
 
     if [[ "$have_kubectx" == "$NOT_FOUND" ]]; then
-        echo "'kubectx' not found, installation in progress..."    
+        echo "'kubectx' not found, installation in progress..."
         install_kubectx "$1"
     else
         echo "'kubectx' found, updating to latest version..."
@@ -168,7 +168,7 @@ main() {
     have_kubectl=$(which kubectl || echo "$NOT_FOUND")
 
     if [[ "$have_kubectl" == "$NOT_FOUND" ]]; then
-        echo "'kubectl' not found, installation in progress..."    
+        echo "'kubectl' not found, installation in progress..."
         install_kubectl
     else
         echo "'kubectl' found, updating to latest version..."
@@ -178,7 +178,7 @@ main() {
     have_helm=$(which helm || echo "$NOT_FOUND")
 
     if [[ "$have_helm" == "$NOT_FOUND" ]]; then
-        echo "'helm' not found, installation in progress..."    
+        echo "'helm' not found, installation in progress..."
         install_helm
     else
         echo "'helm' found, updating to latest version..."
@@ -188,7 +188,7 @@ main() {
     have_minikube=$(which minikube || echo "$NOT_FOUND")
 
     if [[ "$have_minikube" == "$NOT_FOUND" ]]; then
-        echo "'minikube' not found, installation in progress..."    
+        echo "'minikube' not found, installation in progress..."
         install_minikube
     else
         echo "'minikube' found, updating to latest version..."
@@ -202,7 +202,7 @@ startup_validation
 if [ -z "$1" ]; then
     while [ -z "$parameter" ]
     do
-        read -rp "Inform a parameter: (bash/zsh) -> " parameter        
+        read -rp "Inform a parameter: (bash/zsh) -> " parameter
     done
 else
     parameter="$1"
