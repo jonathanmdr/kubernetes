@@ -4,6 +4,7 @@ set -e
 
 KUBECTX_REPOSITORY="https://github.com/ahmetb/kubectx.git"
 RESOURCE_NOT_FOUND="not found"
+
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
@@ -11,28 +12,28 @@ DEFAULT=$(tput sgr0)
 
 
 error_message() {
-    printf "\n\n${RED} ERROR: ${DEFAULT}%s \n\n" "$1"
+    printf "\n${RED} ERROR: ${DEFAULT}%s \n\n" "$1"
 }
 
 warning_message() {
-    printf "\n\n${YELLOW} WARNING: ${DEFAULT}%s \n\n" "$1"
+    printf "\n${YELLOW} WARNING: ${DEFAULT}%s \n\n" "$1"
 }
 
 info_message() {
-    printf "\n\n${GREEN} INFO: ${DEFAULT}%s \n\n" "$1"
+    printf "\n${GREEN} INFO: ${DEFAULT}%s \n\n" "$1"
 }
 
 clean_kubectx_on_bashrc() {
     SYMLINKDIR=$(pkg-config --variable=completionsdir bash-completion)
-    sudo rm -rf "$HOME"/.kubectx && \
-    sudo rm "$SYMLINKDIR"/kubens && \
-    sudo rm "$SYMLINKDIR"/kubectx
+    sudo rm -rf "$HOME"/.kubectx || true
+    sudo rm "$SYMLINKDIR"/kubens || true
+    sudo rm "$SYMLINKDIR"/kubectx || true
 }
 
 clean_kubectx_on_zshrc() {
-    sudo rm -rf "$HOME"/.kubectx && \
-    sudo rm "$HOME"/.oh-my-zsh/completions/_kubens.zsh && \
-    sudo rm "$HOME"/.oh-my-zsh/completions/_kubectx.zsh
+    sudo rm -rf "$HOME"/.kubectx || true
+    sudo rm "$HOME"/.oh-my-zsh/completions/_kubens.zsh || true
+    sudo rm "$HOME"/.oh-my-zsh/completions/_kubectx.zsh || true
 }
 
 clean_kubectx() {
@@ -127,14 +128,23 @@ install_minikube() {
     sudo curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && \
     sudo install minikube /usr/local/bin/minikube && \
     sudo rm minikube && \
-    minikube start && \
+    minikube start --driver=docker && \
     minikube addons enable ingress && \
     minikube addons enable dashboard && \
     minikube addons enable metrics-server && \
-    printf "\n\n\033[4;33m Enabled Addons \033[0m" && \
+    info_message "Enabled Addons: " && \
     minikube addons list | grep STATUS && minikube addons list | grep enabled && \
-    printf "\n\n\033[4;33m Current status of Minikube \033[0m" && \
+    info_message "Current status of Minikube: " && \
     minikube status
+}
+
+validate_resource_installation_type_not_supported() {
+    resource_exists=$(snap list | grep "$1" || echo "$RESOURCE_NOT_FOUND")
+
+    if [[ "$resource_exists" != "$RESOURCE_NOT_FOUND" ]]; then
+        warning_message "'$1' installation type doesn't support, consider installing the '$1' using a package manager"
+        exit 1
+    fi
 }
 
 validate_mandatory_resource() {
@@ -150,8 +160,14 @@ startup_validation() {
     resources_required=("curl" "git" "docker")
 
     for resource in "${resources_required[@]}"; do
-        validate_mandatory_resource "$resource"
+        validate_mandatory_resource "$resource" && \
+        validate_resource_installation_type_not_supported "$resource"
     done
+}
+
+process_docker_basic_config() {
+    sudo usermod -aG docker "$USER" && \
+    sudo systemctl restart docker
 }
 
 process_kubectx_installation() {
@@ -199,6 +215,7 @@ process_minikube_installation() {
 }
 
 main() {
+    process_docker_basic_config && \
     process_kubectx_installation "$1" && \
     process_kubectl_installation && \
     process_helm_installation && \
