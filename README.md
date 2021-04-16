@@ -23,6 +23,8 @@ que lista todas as notícias que são cadastradas pela aplicação admin.
 
 Execute o script bash `setup_env_k8s_dev.sh` para montar o ambiente com os recursos necessários.
 
+ > :warning: O script foi testado somente em distribuições baseadas em Ubuntu.
+
 </br>
 
 Requisitos |
@@ -46,9 +48,8 @@ Instalação |
 #### Exemplo de uso:
 
 ```bash
-~$ chmod +x setup_env_k8s_dev.sh
-~$ ./setup_env_k8s_dev.sh bash #Para quem utiliza o .bashrc
-~$ ./setup_env_k8s_dev.sh zsh #Para quem utiliza o .zshrc
+~$ ./setup_env_k8s_dev.sh bash # Para quem utiliza o .bashrc
+~$ ./setup_env_k8s_dev.sh zsh # Para quem utiliza o .zshrc
 ```
 
 </br>
@@ -61,13 +62,15 @@ Instalação |
 
 Execute o script bash `deploy.sh` para subir a aplicação toda no cluster kubernetes local configurado anteriormente no setup.
 
+ > :warning: O script foi testado somente em distribuições baseadas em Ubuntu.
+
 </br>
 
 #### Exemplo de uso:
 
 ```bash
-~$ chmod +x deploy.sh
-~$ ./deploy.sh
+~$ ./deploy.sh up # Para realizar o deploy da aplicação
+~$ ./deploy.sh down # Para realizar o undeploy da aplicação
 ```
 
 </br>

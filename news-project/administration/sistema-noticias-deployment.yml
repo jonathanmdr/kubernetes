@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: sistema-noticias-statefulset
+  name: sistema-noticias-deployment
 spec:
   replicas: 1
   template:
@@ -47,4 +47,3 @@ spec:
   selector:
     matchLabels:
       app: sistema-noticias
-  serviceName: svc-sistema-noticias

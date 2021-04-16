@@ -1,20 +1,20 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: {{ .Values.administration.statefulset.metadata.name }}-statefulset
+  name: {{ .Values.administration.deployment.metadata.name }}-deployment
 spec:
-  replicas: {{ .Values.administration.statefulset.spec.replicas }}
+  replicas: {{ .Values.administration.deployment.spec.replicas }}
   template:
     metadata:
-      name: {{ .Values.administration.statefulset.spec.template.metadata.name }}
+      name: {{ .Values.administration.deployment.spec.template.metadata.name }}
       labels:
-        app: {{ .Values.administration.statefulset.spec.template.metadata.labels.app }}
+        app: {{ .Values.administration.deployment.spec.template.metadata.labels.app }}
     spec:
       containers:
-        - name: {{ .Values.administration.statefulset.spec.template.spec.container.name }}-container
-          image: {{ .Values.administration.statefulset.spec.template.spec.container.image }}
+        - name: {{ .Values.administration.deployment.spec.template.spec.container.name }}-container
+          image: {{ .Values.administration.deployment.spec.template.spec.container.image }}
           ports:
-            - containerPort: {{ .Values.administration.statefulset.spec.template.spec.container.port.containerPort }}
+            - containerPort: {{ .Values.administration.deployment.spec.template.spec.container.port.containerPort }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.administration.cm.metadata.name }}-configmap
@@ -26,14 +26,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: {{ .Values.administration.statefulset.spec.template.spec.container.port.containerPort }}
+              port: {{ .Values.administration.deployment.spec.template.spec.container.port.containerPort }}
             initialDelaySeconds: 20
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /inserir_noticias.php
-              port: {{ .Values.administration.statefulset.spec.template.spec.container.port.containerPort }}
+              port: {{ .Values.administration.deployment.spec.template.spec.container.port.containerPort }}
             initialDelaySeconds: 3
             periodSeconds: 10
             failureThreshold: 5
@@ -46,5 +46,4 @@ spec:
             claimName: {{ .Values.administration.pvc.session.metadata.name }}-pvc
   selector:
     matchLabels:
-      app: {{ .Values.administration.statefulset.spec.selector.matchLabels.app }}
-  serviceName: {{ .Values.administration.statefulset.spec.serviceName }}
+      app: {{ .Values.administration.deployment.spec.selector.matchLabels.app }}

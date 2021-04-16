@@ -34,7 +34,7 @@ administration:
       ports:
         port: 80
         nodePort: 30001
-  statefulset:
+  deployment:
     metadata:
       name: sistema-noticias
     spec:
@@ -53,4 +53,3 @@ administration:
       selector:
         matchLabels:
           app: sistema-noticias
-      serviceName: sistema-noticias
